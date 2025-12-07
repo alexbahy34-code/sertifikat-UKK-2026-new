@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Sertifikat UKK 2026 - Multijurusan</title>
+    <title>Generator UKK 2026 - Smart Multijurusan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -13,7 +13,7 @@
         .cert-font { font-family: 'Merriweather', serif; }
         .ui-font { font-family: 'Roboto', sans-serif; }
 
-        /* SETUP LAYAR */
+        /* PREVIEW LAYOUT */
         .page {
             width: 210mm; height: 297mm; 
             margin: 10mm auto; padding: 10mm;
@@ -21,14 +21,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             position: relative; box-sizing: border-box; overflow: hidden;
         }
-
-        .page::after {
-            content: ""; position: absolute; inset: 0;
-            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200, 180, 150, 0.03) 10px, rgba(200, 180, 150, 0.03) 20px);
-            pointer-events: none; z-index: 0;
-        }
         
-        /* BINGKAI */
         .certificate-border {
             width: 100%; height: 100%; position: relative; z-index: 1; padding: 10mm; 
             border: 6px solid transparent;
@@ -47,7 +40,7 @@
         .comp-table th { background-color: #003366; color: white; text-align: center; font-weight: bold; border-color: #002244; }
         .comp-table tr:nth-child(even) { background-color: rgba(0, 51, 102, 0.03); }
 
-        /* CETAK A4 SEMPURNA */
+        /* PRINT SETTINGS */
         @media print {
             @page { size: A4 portrait; margin: 0; }
             body { margin: 0; padding: 0; background: white; }
@@ -68,34 +61,28 @@
 <body class="bg-gray-800 ui-font">
 
     <div class="no-print fixed top-0 left-0 w-full md:w-80 h-full bg-gray-900 text-gray-100 shadow-2xl z-50 overflow-y-auto border-r border-gray-700 p-6">
-        <h2 class="text-xl font-bold text-blue-400 mb-2"><i class="fas fa-certificate"></i> Generator Multijurusan</h2>
+        <h2 class="text-xl font-bold text-blue-400 mb-2"><i class="fas fa-certificate"></i> Generator Cerdas</h2>
         
         <div class="bg-gray-800 p-3 rounded mb-4 border border-gray-700">
-            <h3 class="text-xs font-bold text-green-400 mb-2 uppercase">Import Data</h3>
+            <h3 class="text-xs font-bold text-green-400 mb-2 uppercase">Database Excel</h3>
             <div class="grid grid-cols-2 gap-2 mb-2">
-                <button onclick="downloadTemplate()" class="bg-green-700 text-white text-xs py-2 px-2 rounded hover:bg-green-600 flex items-center justify-center gap-1 transition">
-                    <i class="fas fa-download"></i> Template Baru
-                </button>
-                <label for="uploadExcel" class="bg-blue-700 text-white text-xs py-2 px-2 rounded hover:bg-blue-600 flex items-center justify-center gap-1 cursor-pointer transition">
-                    <i class="fas fa-upload"></i> Upload Excel
-                </label>
+                <button onclick="downloadTemplate()" class="bg-green-700 text-white text-xs py-2 px-2 rounded hover:bg-green-600 flex items-center justify-center gap-1 transition"><i class="fas fa-download"></i> Template Baru</button>
+                <label for="uploadExcel" class="bg-blue-700 text-white text-xs py-2 px-2 rounded hover:bg-blue-600 flex items-center justify-center gap-1 cursor-pointer transition"><i class="fas fa-upload"></i> Upload Excel</label>
                 <input type="file" id="uploadExcel" class="hidden" accept=".xlsx, .xls" onchange="handleFileUpload(this)">
             </div>
-            <p class="text-[9px] text-gray-400 italic">Template kini memiliki 2 Sheet: Data Siswa & Daftar Kompetensi</p>
+            <p class="text-[9px] text-gray-400 italic">Support: Multi Jurusan dalam 1 File.</p>
         </div>
 
         <div class="mb-4">
             <label class="block text-xs font-bold text-gray-400 mb-1">PILIH SISWA</label>
-            <select id="studentSelect" class="w-full border-gray-600 rounded border p-2 text-sm bg-gray-700 text-white shadow-sm focus:ring-blue-500 font-bold">
-                <option value="">-- Menunggu Data --</option>
-            </select>
+            <select id="studentSelect" class="w-full border-gray-600 rounded border p-2 text-sm bg-gray-700 text-white shadow-sm focus:ring-blue-500 font-bold"><option value="">-- Menunggu Data --</option></select>
         </div>
 
         <hr class="border-gray-700 mb-4">
 
         <form autocomplete="off" class="space-y-3 text-gray-300">
             <div>
-                <h3 class="text-xs font-bold text-blue-400 uppercase border-b border-gray-700 mb-2 pb-1">Edit Siswa</h3>
+                <h3 class="text-xs font-bold text-blue-400 uppercase border-b border-gray-700 mb-2 pb-1">Data Siswa</h3>
                 <div class="grid grid-cols-1 gap-2">
                     <input type="text" id="inputNama" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm font-bold text-white" placeholder="Nama Siswa">
                     <div class="grid grid-cols-2 gap-2">
@@ -132,7 +119,6 @@
         
         <div class="page cert-font text-center text-gray-900" id="cert-front">
             <div class="certificate-border !justify-between">
-                
                 <div class="mt-2">
                     <div class="flex flex-col justify-center items-center mb-2">
                         <img src="https://iili.io/fu55BrQ.png" alt="Logo" class="w-20 h-auto mb-1 filter drop-shadow-sm">
@@ -203,6 +189,9 @@
                         <tbody id="competencyTableBody" class="bg-white bg-opacity-90">
                             </tbody>
                     </table>
+                    <div id="noCompetencyMsg" class="hidden text-center text-red-500 text-xs mt-4 italic">
+                        * Data kompetensi untuk jurusan ini tidak ditemukan di Excel (Sheet 2).
+                    </div>
                 </div>
 
                 <div class="flex justify-between items-end mt-8 px-8 text-xs text-center text-[#003366] pb-4">
@@ -220,20 +209,24 @@
     </div>
 
     <script>
-        // --- DATA SETUP DEFAULT (AKUNTANSI) ---
-        let competencies = [
-            { code: "M.692000.023.02", title: "Mengoperasikan Aplikasi Komputer Akuntansi" },
-            { code: "M.692000.022.02", title: "Mengoperasikan Paket Program Pengolah Angka" },
-            { code: "M.692000.013.02", title: "Menyusun Laporan Keuangan" },
-            { code: "M.692000.008.02", title: "Memproses Buku Besar" },
-            { code: "M.692000.007.02", title: "Memproses Entry Jurnal" }
-        ];
-
+        // --- VARIABLE GLOBAL ---
         let currentData = [{
             nama: "CONTOH SISWA", nisn: "0000000000", no_sertifikat: "2026-UKK-CONTOH",
-            jurusan: "Akuntansi dan Keuangan Lembaga", judul_uji: "Menyelesaikan Siklus Akuntansi Perusahaan Jasa",
-            judul_uji_en: "Completing the Corporate Accounting Cycle Services", predikat: "Sangat Kompeten"
+            jurusan: "Akuntansi", judul_uji: "Contoh Judul Penugasan",
+            judul_uji_en: "Sample Assignment Title", predikat: "Sangat Kompeten"
         }];
+
+        // Mapping Kompetensi: Key = Nama Jurusan, Value = Array Kompetensi
+        let competencyMap = {
+            "AKUNTANSI": [
+                { code: "M.123.01", title: "Contoh Kompetensi Akuntansi 1" },
+                { code: "M.123.02", title: "Contoh Kompetensi Akuntansi 2" }
+            ],
+            "TKJ": [
+                { code: "J.456.01", title: "Contoh Kompetensi Jaringan 1" },
+                { code: "J.456.02", title: "Contoh Kompetensi Jaringan 2" }
+            ]
+        };
 
         const els = {
             select: document.getElementById('studentSelect'),
@@ -255,12 +248,11 @@
         };
 
         function init() {
-            // Set Default
             els.inputs.tanggal.value = "Kota Tangerang, 01 April 2026";
             els.inputs.kepsek.value = "SARIFUDIN, S.Pd.I.";
             els.inputs.penguji.value = "SRI NILAWATI, S.E.M.M.";
             els.inputs.pt.value = "PT. HASTA KENCANA JAYA";
-            setupEventListeners(); renderTable(); populateDropdown(); loadStudent(0);
+            setupEventListeners(); populateDropdown(); loadStudent(0);
         }
 
         function setupEventListeners() {
@@ -273,36 +265,35 @@
                     if(key === 'nama') els.display.namaBack.innerText = val;
                     if(key === 'no') els.display.noBack.innerText = val;
                     if(key === 'predikat') autoTranslatePredicate(val);
+                    if(key === 'jurusan') renderCompetencyTable(val); // Re-render table if jurusan changed manually
                 });
             });
         }
 
-        // --- EXCEL LOGIC (MULTI-SHEET) ---
-
+        // --- EXCEL DOWNLOAD (TEMPLATE) ---
         function downloadTemplate() {
             const wb = XLSX.utils.book_new();
 
-            // SHEET 1: Data Siswa
+            // SHEET 1: DataSiswa
             const wsSiswa = XLSX.utils.json_to_sheet([
-                { "Nama Siswa": "BUDI SANTOSO", "NISN": "001...", "No Sertifikat": "", "Jurusan": "TKJ", "Judul (Indo)": "Konfigurasi Mikrotik...", "Judul (Inggris)": "", "Predikat": "Sangat Kompeten" },
-                { "Nama Siswa": "SITI AMINAH", "NISN": "002...", "No Sertifikat": "", "Jurusan": "TKJ", "Judul (Indo)": "Konfigurasi Mikrotik...", "Judul (Inggris)": "", "Predikat": "Kompeten" }
+                { "Nama Siswa": "BUDI SANTOSO", "NISN": "00123", "No Sertifikat": "", "Jurusan": "TKJ", "Judul (Indo)": "Instalasi Jaringan", "Judul (Inggris)": "", "Predikat": "Sangat Kompeten" },
+                { "Nama Siswa": "SITI AMINAH", "NISN": "00456", "No Sertifikat": "", "Jurusan": "AKUNTANSI", "Judul (Indo)": "Siklus Akuntansi", "Judul (Inggris)": "", "Predikat": "Kompeten" }
             ]);
-            // Atur lebar kolom agar rapi
-            wsSiswa['!cols'] = [{wch:25}, {wch:15}, {wch:20}, {wch:20}, {wch:30}, {wch:30}, {wch:20}];
             XLSX.utils.book_append_sheet(wb, wsSiswa, "DataSiswa");
 
-            // SHEET 2: Daftar Kompetensi
+            // SHEET 2: DataKompetensi
             const wsKomp = XLSX.utils.json_to_sheet([
-                { "No": 1, "Kode Unit": "J.611000.001.01", "Judul Kompetensi": "Mengumpulkan Kebutuhan Teknis Pengguna yang Menggunakan Jaringan" },
-                { "No": 2, "Kode Unit": "J.611000.002.01", "Judul Kompetensi": "Mengumpulkan Data Peralatan Jaringan Dengan Teknologi yang Sesuai" },
-                { "No": 3, "Kode Unit": "J.611000.003.02", "Judul Kompetensi": "Merancang Topologi Jaringan" }
+                { "Jurusan": "TKJ", "Kode Unit": "J.1", "Judul Kompetensi": "Merancang Jaringan" },
+                { "Jurusan": "TKJ", "Kode Unit": "J.2", "Judul Kompetensi": "Konfigurasi Router" },
+                { "Jurusan": "AKUNTANSI", "Kode Unit": "M.1", "Judul Kompetensi": "Memproses Buku Besar" },
+                { "Jurusan": "AKUNTANSI", "Kode Unit": "M.2", "Judul Kompetensi": "Menyusun Laporan" }
             ]);
-            wsKomp['!cols'] = [{wch:5}, {wch:20}, {wch:50}];
             XLSX.utils.book_append_sheet(wb, wsKomp, "DataKompetensi");
 
-            XLSX.writeFile(wb, "Template_UKK_Multijurusan.xlsx");
+            XLSX.writeFile(wb, "Template_UKK_Smart.xlsx");
         }
 
+        // --- EXCEL UPLOAD LOGIC ---
         function handleFileUpload(input) {
             const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
@@ -310,57 +301,63 @@
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
                 
-                // 1. BACA SHEET 1: DATA SISWA
-                const sheetNameSiswa = workbook.SheetNames[0]; // Asumsi sheet pertama
-                const jsonSiswa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNameSiswa]);
-                
-                // 2. BACA SHEET 2: KOMPETENSI (Jika ada)
+                // 1. Parsing Sheet DataSiswa
+                const sheetSiswa = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonSiswa = XLSX.utils.sheet_to_json(sheetSiswa);
+
+                // 2. Parsing Sheet DataKompetensi
                 if (workbook.SheetNames.length > 1) {
-                    const sheetNameKomp = workbook.SheetNames[1]; // Asumsi sheet kedua
-                    const jsonKomp = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNameKomp]);
-                    
-                    if(jsonKomp.length > 0) {
-                        // Update variabel global competencies
-                        competencies = jsonKomp.map(row => ({
-                            code: row["Kode Unit"] || row["Kode"] || row["Code"] || "-",
-                            title: row["Judul Kompetensi"] || row["Judul"] || row["Title"] || "-"
-                        }));
-                        renderTable(); // Refresh Tabel Belakang
-                    }
+                    const sheetKomp = workbook.SheetNames[1];
+                    const jsonKomp = XLSX.utils.sheet_to_json(sheetKomp);
+                    processCompetencyData(jsonKomp);
                 }
 
-                if (jsonSiswa.length > 0) {
-                    processUploadedData(jsonSiswa);
-                } else {
-                    alert("Data Siswa Kosong!");
-                }
+                if (jsonSiswa.length > 0) processStudentData(jsonSiswa);
+                else alert("Data Siswa Kosong!");
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function processUploadedData(json) {
+        // Memproses Data Kompetensi menjadi Group berdasarkan Jurusan
+        function processCompetencyData(json) {
+            competencyMap = {}; // Reset map
+            json.forEach(row => {
+                // Ambil Key Jurusan (Normalisasi: Uppercase & Trim)
+                const jur = (row["Jurusan"] || row["jurusan"] || "UMUM").toUpperCase().trim();
+                const code = row["Kode Unit"] || row["Kode"] || "-";
+                const title = row["Judul Kompetensi"] || row["Judul"] || "-";
+
+                if (!competencyMap[jur]) competencyMap[jur] = [];
+                competencyMap[jur].push({ code, title });
+            });
+            console.log("Competency Map Loaded:", competencyMap);
+        }
+
+        function processStudentData(json) {
             currentData = json.map(row => ({
                 nama: (row["Nama Siswa"] || row["Nama"] || "").toUpperCase(), 
                 nisn: row["NISN"] ? String(row["NISN"]) : "-",
                 no_sertifikat: row["No Sertifikat"] || ("2026-UKK-" + (row["NISN"]||"")),
-                jurusan: row["Jurusan"] || "Akuntansi dan Keuangan Lembaga",
+                jurusan: (row["Jurusan"] || "").toUpperCase().trim(),
                 judul_uji: row["Judul (Indo)"] || row["Judul"] || "",
                 judul_uji_en: row["Judul (Inggris)"] || "",
                 predikat: row["Predikat"] || "Sangat Kompeten"
             }));
             populateDropdown(); loadStudent(0); 
-            alert(`Berhasil memuat ${currentData.length} Siswa & ${competencies.length} Kompetensi!`);
+            alert(`Berhasil Load! ${currentData.length} Siswa, ${Object.keys(competencyMap).length} Jurusan terdeteksi.`);
         }
 
         function populateDropdown() {
-            els.select.innerHTML = currentData.map((s, i) => `<option value="${i}">${i+1}. ${s.nama}</option>`).join('');
+            els.select.innerHTML = currentData.map((s, i) => `<option value="${i}">${i+1}. ${s.nama} (${s.jurusan})</option>`).join('');
         }
 
         function loadStudent(index) {
             if (index === "") return; const s = currentData[index];
             els.inputs.nama.value = s.nama; els.inputs.nisn.value = s.nisn; els.inputs.no.value = s.no_sertifikat;
             els.inputs.jurusan.value = s.jurusan; els.inputs.judul.value = s.judul_uji; els.inputs.judulEn.value = s.judul_uji_en; els.inputs.predikat.value = s.predikat;
-            updateDisplayAll();
+            
+            updateDisplayAll(); // Ini akan memicu renderCompetencyTable via event listener atau manual call
+            renderCompetencyTable(s.jurusan); // Pastikan tabel diupdate sesuai jurusan siswa
         }
 
         function updateDisplayAll() {
@@ -374,13 +371,34 @@
             });
         }
 
+        // RENDER TABEL CERDAS
+        function renderCompetencyTable(jurusanName) {
+            const jurKey = (jurusanName || "").toUpperCase().trim();
+            // Cari jurusan yang cocok di Map. Jika tidak ada, coba cari parsial (misal "TKJ 1" match "TKJ")
+            let list = competencyMap[jurKey];
+            
+            // Fallback logic jika tidak ketemu exact match
+            if (!list) {
+                const foundKey = Object.keys(competencyMap).find(k => jurKey.includes(k) || k.includes(jurKey));
+                if (foundKey) list = competencyMap[foundKey];
+            }
+
+            const tbody = document.getElementById('competencyTableBody');
+            const msg = document.getElementById('noCompetencyMsg');
+
+            if (list && list.length > 0) {
+                tbody.innerHTML = list.map((c, i) => `<tr><td class="text-center font-bold">${i+1}</td><td class="text-center font-mono text-xs">${c.code}</td><td>${c.title}</td></tr>`).join('');
+                msg.classList.add('hidden');
+            } else {
+                tbody.innerHTML = "";
+                msg.classList.remove('hidden');
+                msg.innerText = `* Data kompetensi untuk jurusan "${jurusanName}" tidak ditemukan di Sheet 2 Excel.`;
+            }
+        }
+
         function autoTranslatePredicate(indoVal) {
             els.display.predikat.innerText = indoVal;
             els.display.predikatEn.innerText = { "Sangat Kompeten": "Very Competent", "Kompeten": "Competent", "Cukup Kompeten": "Enough Competent" }[indoVal] || "";
-        }
-
-        function renderTable() {
-            document.getElementById('competencyTableBody').innerHTML = competencies.map((c, i) => `<tr><td class="text-center font-bold">${i+1}</td><td class="text-center font-mono text-xs">${c.code}</td><td>${c.title}</td></tr>`).join('');
         }
 
         window.onload = init;
