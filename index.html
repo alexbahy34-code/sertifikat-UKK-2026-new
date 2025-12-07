@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sertifikat UKK 2026 - Fixed A4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        /* --- FONT RESMI --- */
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Roboto:wght@300;400;500&display=swap');
+        .cert-font { font-family: 'Merriweather', serif; }
+        .ui-font { font-family: 'Roboto', sans-serif; }
+
+        /* --- SETUP KERTAS A4 (FIXED SIZE) --- */
+        .page {
+            width: 210mm; 
+            height: 297mm; 
+            margin: 10mm auto;
+            padding: 10mm; 
+            background: radial-gradient(circle at center, #fffcf5 0%, #f2eadd 100%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative; 
+            box-sizing: border-box;
+            overflow: hidden; 
+        }
+
+        .page::after {
+            content: ""; position: absolute; inset: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200, 180, 150, 0.03) 10px, rgba(200, 180, 150, 0.03) 20px);
+            pointer-events: none; z-index: 0;
+        }
+        
+        /* --- BINGKAI --- */
+        .certificate-border {
+            width: 100%; height: 100%; position: relative; z-index: 1; padding: 10mm; 
+            border: 6px solid transparent;
+            background: linear-gradient(#fffcf5, #fffcf5) padding-box, linear-gradient(135deg, #cba434 0%, #b8860b 25%, #003366 75%, #cba434 100%) border-box;
+            box-shadow: inset 0 0 20px rgba(184, 134, 11, 0.15);
+            display: flex; flex-direction: column; 
+            /* Perubahan: Hapus justify-between agar konten mengalir (flow) dari atas ke bawah */
+        }
+
+        .certificate-border::before {
+            content: ""; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px; border: 1px solid #003366; opacity: 0.3; pointer-events: none;
+        }
+
+        /* --- TABEL --- */
+        .comp-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-top: 5px; }
+        .comp-table th, .comp-table td { border: 1px solid #889bb0; padding: 6px 8px; text-align: left; vertical-align: middle; }
+        .comp-table th { background-color: #003366; color: white; text-align: center; font-weight: bold; border-color: #002244; }
+        .comp-table tr:nth-child(even) { background-color: rgba(0, 51, 102, 0.03); }
+
+        /* --- PRINT --- */
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            body { background: white; margin: 0; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .no-print { display: none !important; }
+            .page { margin: 0; box-shadow: none; page-break-after: always; width: 210mm; height: 297mm; }
+            .page { background: radial-gradient(circle at center, #fffcf5 0%, #f2eadd 100%) !important; }
+            .certificate-border { background: linear-gradient(#fffcf5, #fffcf5) padding-box, linear-gradient(135deg, #cba434 0%, #b8860b 25%, #003366 75%, #cba434 100%) border-box !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-800 ui-font">
+
+    <div class="no-print fixed top-0 left-0 w-full md:w-80 h-full bg-gray-900 text-gray-100 shadow-2xl z-50 overflow-y-auto border-r border-gray-700 p-6" id="sidebar">
+        <h2 class="text-xl font-bold text-blue-400 mb-2"><i class="fas fa-certificate"></i> Generator Premium</h2>
+        
+        <div class="bg-gray-800 p-3 rounded mb-4 border border-gray-700">
+            <h3 class="text-xs font-bold text-green-400 mb-2 uppercase">Data Excel</h3>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+                <button onclick="downloadTemplate()" class="bg-green-700 text-white text-xs py-2 px-2 rounded hover:bg-green-600 flex items-center justify-center gap-1 transition"><i class="fas fa-download"></i> Template</button>
+                <label for="uploadExcel" class="bg-blue-700 text-white text-xs py-2 px-2 rounded hover:bg-blue-600 flex items-center justify-center gap-1 cursor-pointer transition"><i class="fas fa-upload"></i> Upload</label>
+                <input type="file" id="uploadExcel" class="hidden" accept=".xlsx, .xls" onchange="handleFileUpload(this)">
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-xs font-bold text-gray-400 mb-1">PILIH SISWA</label>
+            <select id="studentSelect" class="w-full border-gray-600 rounded border p-2 text-sm bg-gray-700 text-white shadow-sm focus:ring-blue-500 font-bold"><option value="">-- Menunggu Data --</option></select>
+        </div>
+
+        <hr class="border-gray-700 mb-4">
+
+        <form autocomplete="off" class="space-y-3 text-gray-300">
+            <div>
+                <h3 class="text-xs font-bold text-blue-400 uppercase border-b border-gray-700 mb-2 pb-1">Edit Cepat</h3>
+                <div class="grid grid-cols-1 gap-2">
+                    <input type="text" id="inputNama" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm font-bold text-white" placeholder="Nama Siswa">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="inputNISN" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm" placeholder="NISN">
+                        <input type="text" id="inputNo" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-xs" placeholder="No. Sertifikat">
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <input type="text" id="inputJurusan" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm" placeholder="Jurusan">
+                <textarea id="inputJudul" rows="2" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm" placeholder="Judul (Indo)"></textarea>
+                <textarea id="inputJudulEn" rows="2" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm italic" placeholder="Judul (Inggris)"></textarea>
+                <select id="inputPredikat" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm">
+                    <option value="Sangat Kompeten">Sangat Kompeten</option>
+                    <option value="Kompeten">Kompeten</option>
+                    <option value="Cukup Kompeten">Cukup Kompeten</option>
+                </select>
+            </div>
+            <div class="space-y-2 pt-2">
+                <h3 class="text-xs font-bold text-blue-400 uppercase border-b border-gray-700 mb-2 pb-1">Tanda Tangan</h3>
+                <input type="text" id="inputTanggal" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm" placeholder="Tanggal">
+                <input type="text" id="inputKepsek" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm" placeholder="Kepsek">
+                <input type="text" id="inputPenguji" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm" placeholder="Penguji Eks">
+                <input type="text" id="inputPT" class="w-full border-gray-600 bg-gray-700 rounded p-1 text-sm" placeholder="PT/DUDI">
+            </div>
+        </form>
+
+        <button onclick="window.print()" class="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold py-3 px-4 rounded mt-6 shadow-lg transition flex items-center justify-center gap-2">
+            <i class="fas fa-print"></i> CETAK PDF
+        </button>
+    </div>
+
+    <div class="md:ml-80 p-8 flex flex-col items-center min-h-screen bg-gray-900 overflow-auto">
+        
+        <div class="page cert-font text-center text-gray-900" id="cert-front">
+            <div class="certificate-border !justify-between">
+                
+                <div class="mt-2">
+                    <div class="flex flex-col justify-center items-center mb-2">
+                        <img src="https://iili.io/fu55BrQ.png" alt="Logo" class="w-20 h-auto mb-1 filter drop-shadow-sm">
+                    </div>
+                    <h1 class="text-4xl font-extrabold uppercase tracking-wider text-[#003366]">Sertifikat Kompetensi</h1>
+                    <h2 class="text-xl italic text-[#b8860b] font-serif">Certificate of Competency</h2>
+                    <p class="mt-4 text-sm font-bold text-[#003366]">Nomor: <span id="dispNo" class="font-mono text-black">...</span></p>
+                </div>
+
+                <div class="flex-grow flex flex-col justify-center space-y-4">
+                    <div>
+                        <p class="text-lg text-[#003366]">Dengan ini menyatakan bahwa,<br><span class="italic text-sm text-gray-600">This is to certify that</span></p>
+                        <div class="py-2 relative">
+                            <h2 id="dispNama" class="text-[2.2rem] leading-tight font-black uppercase text-black tracking-wide">NAMA SISWA</h2>
+                            <div class="w-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#b8860b] to-transparent mx-auto mt-1"></div>
+                            <p class="text-lg mt-1 font-bold text-[#003366]">NISN: <span id="dispNISN" class="text-black">...</span></p>
+                        </div>
+                    </div>
+                    <div><p class="text-lg text-[#003366]">Telah mengikuti Uji Kompetensi Keahlian<br><span class="italic text-sm text-gray-600">has taken the competency test</span></p></div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div><p class="text-xs text-[#003366] uppercase font-bold tracking-widest">Kompetensi Keahlian / in Competency of</p><h3 id="dispJurusan" class="text-xl font-bold text-black">...</h3></div>
+                        <div><p class="text-xs text-[#003366] uppercase font-bold tracking-widest">Judul Penugasan / on Assignment</p><h3 id="dispJudul" class="text-lg font-bold italic text-black">...</h3><p id="dispJudulEn" class="text-xs italic text-gray-700">...</p></div>
+                        <div><p class="text-xs text-[#003366] uppercase font-bold tracking-widest">Predikat / Achievement Level</p><h3 id="dispPredikat" class="text-2xl font-extrabold text-[#003366]">...</h3><p id="dispPredikatEn" class="text-sm italic text-[#b8860b] font-bold">...</p></div>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <p class="text-xs mb-6 text-[#003366]">Sertifikat ini berlaku untuk: 3 (tiga) Tahun<br><span class="italic text-gray-600">Valid for: 3 (three) Years</span></p>
+                    <div class="flex justify-between items-end px-4 text-xs text-[#003366]">
+                        <div class="text-center w-1/3">
+                            <p class="font-bold mb-14 relative z-10"><span id="dispPT">...</span></p>
+                            <p class="font-bold border-b border-[#003366] inline-block min-w-[140px]" id="dispPenguji">...</p>
+                            <p>Penguji Eksternal<br><span class="italic text-[10px]">External Assessor</span></p>
+                        </div>
+                        <div class="text-center w-1/3">
+                            <p class="mb-1" id="dispTanggal">...</p>
+                            <p class="font-bold mb-14">Atas nama SMKS DEWI SARTIKA<br><span class="italic font-normal text-[10px]">On behalf of SMKS DEWI SARTIKA</span></p>
+                            <p class="font-bold border-b border-[#003366] inline-block min-w-[140px]" id="dispKepsek">...</p>
+                            <p>Kepala Sekolah<br><span class="italic text-[10px]">School Principal</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page cert-font text-gray-900 mt-12" id="cert-back">
+             <div class="certificate-border">
+                
+                <div class="w-full flex justify-between text-[10px] text-gray-400 border-b border-gray-200 pb-2 mb-4">
+                    <span id="dispNamaBack" class="font-bold uppercase">NAMA SISWA</span>
+                    <span id="dispNoBack">Nomor Sertifikat</span>
+                </div>
+
+                <div class="text-center mb-4">
+                    <h2 class="text-2xl font-extrabold uppercase text-[#003366]">Daftar Kompetensi</h2>
+                    <h3 class="text-lg italic text-[#b8860b] font-serif">List of Competency</h3>
+                </div>
+
+                <div class="w-full">
+                    <table class="comp-table shadow-sm w-full">
+                        <thead>
+                            <tr>
+                                <th width="8%">No</th>
+                                <th width="25%">Kode Kompetensi<br><span class="italic font-normal text-[10px] opacity-80">Code of Competency</span></th>
+                                <th>Judul Kompetensi<br><span class="italic font-normal text-[10px] opacity-80">Title of Competency</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="competencyTableBody" class="bg-white bg-opacity-90">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-between items-end mt-12 px-8 text-xs text-center text-[#003366] pb-8">
+                   <div class="w-1/3">
+                        <p class="mb-16 font-bold">Penguji Internal<br><span class="italic text-[10px] font-normal">Internal Assessor</span></p>
+                        <p class="font-bold border-b border-[#003366] inline-block min-w-[140px]">JUBAEDAH, S.Pd.</p>
+                   </div>
+                   <div class="w-1/3">
+                        <p class="mb-16 font-bold">Penguji Eksternal<br><span class="italic text-[10px] font-normal">External Assessor</span></p>
+                        <p class="font-bold border-b border-[#003366] inline-block min-w-[140px]" id="dispPengujiBack">...</p>
+                   </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA SETUP ---
+        const competencies = [
+            { code: "M.692000.023.02", title: "Mengoperasikan Aplikasi Komputer Akuntansi" },
+            { code: "M.692000.022.02", title: "Mengoperasikan Paket Program Pengolah Angka/Spreadsheet" },
+            { code: "M.692000.013.02", title: "Menyusun Laporan Keuangan" },
+            { code: "M.692000.008.02", title: "Memproses Buku Besar" },
+            { code: "M.692000.007.02", title: "Memproses Entry Jurnal" },
+            { code: "M.692000.002.02", title: "Menerapkan Praktik-Praktik Kesehatan Dan Keselamatan Di Tempat Kerja" },
+            { code: "M.692000.001.02", title: "Menerapkan Prinsip Praktik Profesional Dalam Bekerja" }
+        ];
+
+        let currentData = [{
+            nama: "CONTOH SISWA", nisn: "0000000000", no_sertifikat: "2026-UKK-SAMPLE",
+            jurusan: "Akuntansi dan Keuangan Lembaga", judul_uji: "Menyelesaikan Siklus Akuntansi Perusahaan Jasa",
+            judul_uji_en: "Completing the Corporate Accounting Cycle Services", predikat: "Sangat Kompeten"
+        }];
+
+        const els = {
+            select: document.getElementById('studentSelect'),
+            inputs: {
+                nama: document.getElementById('inputNama'), nisn: document.getElementById('inputNISN'),
+                no: document.getElementById('inputNo'), jurusan: document.getElementById('inputJurusan'),
+                judul: document.getElementById('inputJudul'), judulEn: document.getElementById('inputJudulEn'),
+                predikat: document.getElementById('inputPredikat'), tanggal: document.getElementById('inputTanggal'),
+                kepsek: document.getElementById('inputKepsek'), penguji: document.getElementById('inputPenguji'), pt: document.getElementById('inputPT')
+            },
+            display: {
+                nama: document.getElementById('dispNama'), namaBack: document.getElementById('dispNamaBack'),
+                nisn: document.getElementById('dispNISN'), no: document.getElementById('dispNo'), noBack: document.getElementById('dispNoBack'),
+                jurusan: document.getElementById('dispJurusan'), judul: document.getElementById('dispJudul'), judulEn: document.getElementById('dispJudulEn'),
+                predikat: document.getElementById('dispPredikat'), predikatEn: document.getElementById('dispPredikatEn'),
+                tanggal: document.getElementById('dispTanggal'), kepsek: document.getElementById('dispKepsek'),
+                penguji: document.getElementById('dispPenguji'), pengujiBack: document.getElementById('dispPengujiBack'), pt: document.getElementById('dispPT')
+            }
+        };
+
+        function init() {
+            els.inputs.tanggal.value = "Kota Tangerang, 01 April 2026";
+            els.inputs.kepsek.value = "SARIFUDIN, S.Pd.I.";
+            els.inputs.penguji.value = "SRI NILAWATI, S.E.M.M.";
+            els.inputs.pt.value = "PT. HASTA KENCANA JAYA";
+            setupEventListeners(); renderTable(); populateDropdown(); loadStudent(0);
+        }
+
+        function setupEventListeners() {
+            els.select.addEventListener('change', (e) => loadStudent(e.target.value));
+            Object.keys(els.inputs).forEach(key => {
+                els.inputs[key].addEventListener('input', (e) => {
+                    const val = e.target.value;
+                    if(els.display[key]) els.display[key].innerText = val;
+                    if(key === 'penguji') els.display.pengujiBack.innerText = val;
+                    if(key === 'nama') els.display.namaBack.innerText = val;
+                    if(key === 'no') els.display.noBack.innerText = val;
+                    if(key === 'predikat') autoTranslatePredicate(val);
+                });
+            });
+        }
+
+        function downloadTemplate() {
+            const ws = XLSX.utils.json_to_sheet([
+                { "Nama Siswa": "BUDI SANTOSO", "NISN": "001...", "No Sertifikat": "", "Jurusan": "Akuntansi...", "Judul (Indo)": "Menyelesaikan...", "Judul (Inggris)": "", "Predikat": "Sangat Kompeten" }
+            ]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Data");
+            XLSX.writeFile(wb, "Template_UKK_Premium.xlsx");
+        }
+
+        function handleFileUpload(input) {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                if (jsonData.length > 0) processUploadedData(jsonData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processUploadedData(json) {
+            currentData = json.map(row => ({
+                nama: (row["Nama Siswa"] || "").toUpperCase(), nisn: row["NISN"] ? String(row["NISN"]) : "-",
+                no_sertifikat: row["No Sertifikat"] || ("2026-UKK-" + (row["NISN"]||"")),
+                jurusan: row["Jurusan"] || "Akuntansi dan Keuangan Lembaga",
+                judul_uji: row["Judul (Indo)"] || "",
+                judul_uji_en: row["Judul (Inggris)"] || (row["Judul (Indo)"]?.includes("Siklus") ? "Completing the Corporate Accounting Cycle Services" : ""),
+                predikat: row["Predikat"] || "Sangat Kompeten"
+            }));
+            populateDropdown(); loadStudent(0); alert(`Berhasil memuat ${currentData.length} data!`);
+        }
+
+        function populateDropdown() {
+            els.select.innerHTML = currentData.map((s, i) => `<option value="${i}">${i+1}. ${s.nama}</option>`).join('');
+        }
+
+        function loadStudent(index) {
+            if (index === "") return; const s = currentData[index];
+            els.inputs.nama.value = s.nama; els.inputs.nisn.value = s.nisn; els.inputs.no.value = s.no_sertifikat;
+            els.inputs.jurusan.value = s.jurusan; els.inputs.judul.value = s.judul_uji; els.inputs.judulEn.value = s.judul_uji_en; els.inputs.predikat.value = s.predikat;
+            updateDisplayAll();
+        }
+
+        function updateDisplayAll() {
+            Object.keys(els.inputs).forEach(key => {
+                const val = els.inputs[key].value;
+                if(els.display[key]) els.display[key].innerText = val;
+                if(key === 'penguji') els.display.pengujiBack.innerText = val;
+                if(key === 'nama') els.display.namaBack.innerText = val;
+                if(key === 'no') els.display.noBack.innerText = val;
+                if(key === 'predikat') autoTranslatePredicate(val);
+            });
+        }
+
+        function autoTranslatePredicate(indoVal) {
+            els.display.predikat.innerText = indoVal;
+            els.display.predikatEn.innerText = { "Sangat Kompeten": "Very Competent", "Kompeten": "Competent", "Cukup Kompeten": "Enough Competent" }[indoVal] || "";
+        }
+
+        function renderTable() {
+            document.getElementById('competencyTableBody').innerHTML = competencies.map((c, i) => `<tr><td class="text-center font-bold">${i+1}</td><td class="text-center font-mono text-xs">${c.code}</td><td>${c.title}</td></tr>`).join('');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
